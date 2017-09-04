@@ -33,4 +33,23 @@ public class ReceiptController {
         List<ReceiptsRecord> receiptRecords = receipts.getAllReceipts();
         return receiptRecords.stream().map(ReceiptResponse::new).collect(toList());
     }
+
+    @PUT
+    @Path("/tags/{tag}")
+    public int toggleTag(@PathParam("tag") String tagName, int id) {
+        return receipts.tag(tagName, id);
+    }
+
+    @GET
+    @Path("/tags")
+    public List getTags() {
+        List<ReceiptsRecord> tagRecords = receipts.getAllTags();
+        return tagRecords.stream().map(ReceiptResponse::new).collect(toList());
+    }
+
+    @GET
+    @Path("/netid")
+    public String getNetId(){
+        return "zz524";
+    }
 }
