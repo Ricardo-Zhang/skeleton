@@ -13,8 +13,6 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 
 public class CreateReceiptRequestTest {
 
-    private final Validator validator = Validators.newValidator();
-
     @Test
     public void testValid() {
         CreateReceiptRequest receipt = new CreateReceiptRequest();
@@ -23,6 +21,8 @@ public class CreateReceiptRequestTest {
         receipt.amount = new BigDecimal(33.44);
         assertThat(validator.validate(receipt), empty());
     }
+
+    private final Validator validator = Validators.newValidator();
 
     @Test
     public void testMissingAmount() {

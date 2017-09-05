@@ -5,7 +5,9 @@ package generated;
 
 
 import generated.tables.Receipts;
+import generated.tables.Tag;
 import generated.tables.records.ReceiptsRecord;
+import generated.tables.records.TagRecord;
 
 import javax.annotation.Generated;
 
@@ -33,6 +35,7 @@ public class Keys {
 	// -------------------------------------------------------------------------
 
 	public static final Identity<ReceiptsRecord, Integer> IDENTITY_RECEIPTS = Identities0.IDENTITY_RECEIPTS;
+	public static final Identity<TagRecord, Integer> IDENTITY_TAG = Identities0.IDENTITY_TAG;
 
 	// -------------------------------------------------------------------------
 	// UNIQUE and PRIMARY KEY definitions
@@ -51,6 +54,7 @@ public class Keys {
 
 	private static class Identities0 extends AbstractKeys {
 		public static Identity<ReceiptsRecord, Integer> IDENTITY_RECEIPTS = createIdentity(Receipts.RECEIPTS, Receipts.RECEIPTS.ID);
+		public static Identity<TagRecord, Integer> IDENTITY_TAG = createIdentity(Tag.TAG, Tag.TAG.TID);
 	}
 
 	private static class UniqueKeys0 extends AbstractKeys {

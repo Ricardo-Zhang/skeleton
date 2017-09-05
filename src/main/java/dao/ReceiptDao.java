@@ -2,6 +2,7 @@ package dao;
 
 import api.ReceiptResponse;
 import generated.tables.records.ReceiptsRecord;
+import generated.tables.records.TagRecord;
 import org.jooq.Configuration;
 import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
@@ -11,6 +12,8 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
 import static generated.Tables.RECEIPTS;
+import static generated.Tables.TAG;
+
 
 public class ReceiptDao {
     DSLContext dsl;
@@ -31,33 +34,32 @@ public class ReceiptDao {
         return receiptsRecord.getId();
     }
 
-    public int tag(String tagName, int id){
+    public void tag(String tagName, int id){
         boolean Exist = dsl.fetchExists(
                 dsl.selectOne()
-                    .from(DSL.table("tag"))
-                    .where(DSL.field("id").eq(id),
-                            DSL.field("tagname").eq(tagName))
+                    .from(TAG)
+                    .where(TAG.ID.eq(id),
+                            TAG.TAGNAME.eq(tagName))
         );
         if (Exist){
-            dsl.delete(DSL.table("tag"))
-                    .where(DSL.field("id").eq(id),
-                            DSL.field("tagname").eq(tagName))
+            dsl.delete(TAG)
+                    .where(TAG.ID.eq(id),
+                            TAG.TAGNAME.eq(tagName))
                     .execute();
-            return 1;
         }
         else{
-            dsl.insertInto(DSL.table("tag"),DSL.field("tagname"),DSL.field("id"))
+            dsl.insertInto(TAG,TAG.TAGNAME,TAG.ID)
                     .values(tagName, id)
                     .execute();
-            return 2;
         }
     }
 
-    public List<ReceiptsRecord> getAllTags(){
+    public List<ReceiptsRecord> getTags(String tagName){
         return dsl.selectFrom(RECEIPTS)
                 .where(RECEIPTS.ID.in(
-                        dsl.select(DSL.field("id"))
-                        .from(DSL.table("tag"))
+                        dsl.select(TAG.ID)
+                        .from(TAG)
+                        .where(TAG.TAGNAME.eq(tagName))
                         .fetch()
                         .getValues("id")
                 ))

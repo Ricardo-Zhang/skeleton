@@ -12,8 +12,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-
-@Path("/receipts")
+@Path("")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class ReceiptController {
@@ -24,11 +23,13 @@ public class ReceiptController {
     }
 
     @POST
+    @Path("/receipts")
     public int createReceipt(@Valid @NotNull CreateReceiptRequest receipt) {
         return receipts.insert(receipt.merchant, receipt.amount);
     }
 
     @GET
+    @Path("/receipts")
     public List<ReceiptResponse> getReceipts() {
         List<ReceiptsRecord> receiptRecords = receipts.getAllReceipts();
         return receiptRecords.stream().map(ReceiptResponse::new).collect(toList());
@@ -36,14 +37,14 @@ public class ReceiptController {
 
     @PUT
     @Path("/tags/{tag}")
-    public int toggleTag(@PathParam("tag") String tagName, int id) {
-        return receipts.tag(tagName, id);
+    public void toggleTag(@PathParam("tag") String tagName, int id) {
+        receipts.tag(tagName, id);
     }
 
     @GET
-    @Path("/tags")
-    public List getTags() {
-        List<ReceiptsRecord> tagRecords = receipts.getAllTags();
+    @Path("/tags/{tag}")
+    public List getTags(@PathParam("tag") String tagName) {
+        List<ReceiptsRecord> tagRecords = receipts.getTags(tagName);
         return tagRecords.stream().map(ReceiptResponse::new).collect(toList());
     }
 
