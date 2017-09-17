@@ -32,6 +32,6 @@ public class ReceiptDao {
     }
 
     public List<ReceiptsRecord> getAllReceipts() {
-        return dsl.selectFrom(RECEIPTS).fetch();
+        return dsl.selectFrom(RECEIPTS).join(TAGS).on(RECEIPTS.ID.eq(TAGS.ID)).fetch();
     }
 }
