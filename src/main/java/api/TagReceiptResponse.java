@@ -18,7 +18,7 @@ import java.util.ArrayList;
  * Any properties that you want exposed when this class is translated to JSON must be
  * annotated with {@link JsonProperty}
  */
-public class ReceiptResponse {
+public class TagReceiptResponse {
     @JsonProperty
     Integer id;
 
@@ -32,18 +32,18 @@ public class ReceiptResponse {
     Time created;
 
     @JsonProperty
-    String [] tags;
-    public ReceiptResponse(ReceiptsRecord dbRecord) {
+    String [] tagnames;
+    public TagReceiptResponse(ReceiptsRecord dbRecord) {
         this.merchantName = dbRecord.getMerchant();
         this.value = dbRecord.getAmount();
         this.created = dbRecord.getUploaded();
         this.id = dbRecord.getId();
     }
-    public void findTags(List<TagsRecord> tags){
-      ArrayList<String> tagsList = new ArrayList<>();
-      for (TagsRecord tag : tags) {
-        tagsList.add(tag.getTagname());
-      }
-      this.tags = tagsList.toArray(new String[0]);
-    }
+    public void tagArray(List<TagsRecord> tags){
+        ArrayList<String> taglist = new ArrayList<>();
+        for (TagsRecord tag : tags) {
+            taglist.add(tag.getTagname());
+        }
+    this.tagnames = taglist.toArray(new String[0]);
+  }
 }

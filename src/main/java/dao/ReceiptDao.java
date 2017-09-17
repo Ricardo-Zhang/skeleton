@@ -10,6 +10,7 @@ import org.jooq.impl.DSL;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.ArrayList;
 
 import static com.google.common.base.Preconditions.checkState;
 import static generated.Tables.RECEIPTS;
@@ -35,7 +36,15 @@ public class ReceiptDao {
         return receiptsRecord.getId();
     }
 
-    public List<ReceiptsRecord> getAllReceipts() {
-        return dsl.selectFrom(RECEIPTS).fetch();
+    public List<ReceiptResponse> getAllReceipts() {
+        List<ReceiptsRecord> receiptsRecord = dsl.selectFrom(RECEIPTS).fetch();
+        ArrayList<ReceiptResponse> responses = new ArrayList<>();
+        for (ReceiptsRecord record : receiptsRecord) {
+          List<TagsRecord> tagRecords = dsl.selectFrom(TAGS).where(TAGS.ID.eq(record.getId())).fetch();
+          ReceiptResponse response = new ReceiptResponse(record);
+          response.findTags(tagRecords);
+          responses.add(response);
+                }
+        return responses;
     }
 }
