@@ -40,6 +40,8 @@
                     var receipt = receipts[i];
                     $(`<div class="receipt">${receipt.merchantName}<div><span class="receiptTag">t1</span></div></div>`)
                         .appendTo($("#receiptList"));
+                    $(`<div class="receipt">${receipt.amount}<div><span class="receiptTag">t1</span></div></div>`)
+                        .appendTo($("#receiptList"));
                 }
 
             })
