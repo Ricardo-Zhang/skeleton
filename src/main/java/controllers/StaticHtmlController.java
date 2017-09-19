@@ -14,6 +14,7 @@ public class StaticHtmlController {
     @GET
     public String getIndexPage() throws IOException {
         Resources.getResource("index.html");
+
         return Resources.toString(Resources.getResource("index.html"), UTF_8);
     }
 }
