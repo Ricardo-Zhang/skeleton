@@ -36,6 +36,9 @@
             background-color: #eee;
             margin-bottom: 5px;
         }
+        .receiptPanel {
+            display: none;
+        }
     </style>
     <script>
         // This is the idiomatic way to ensure that JQuery does not
@@ -44,29 +47,24 @@
             const api = "http://localhost:8080"; // <- do not need a root api URL if this page is served directly by the API
             $(loadReceipts);
             function loadReceipts() {
-            $(".receiptList").remove();
+            $("#receiptList").remove();
             $.getJSON(api+"/receipts", function(receipts){
               var items = [];
               $.each( receipts, function( key, val ) {
-                var tags = [];
+                items.push( "<div class=receipt>");
+                items.push( "<div>" + val.created + "</div>" );
+                items.push( "<div class='merchant'>" + val.merchantName + "</div>" );
+                items.push( "<div class='amount'>" + val.value + "</div>" );
                 $.each(val.tags,function (j, singleTag){
-                tags.push("<div id='" + key + " tag' class='tag tagValue'>" + singleTag + "</div>");
-                })
-                items.push( "<div class='receipt'>")
-                items.push( "<div id='" + key + "'>" + val.created + "</div>" );
-                items.push( "<div id='" + key + "' class='merchant'>" + val.merchantName + "</div>" );
-                items.push( "<div id='" + key + "' class='amount'>" + val.value + "</div>" );
-                items.push(tags);
-                //items.push( "<div id='" + key + " tag' class='tag tags'>" + val.tags + "</div>" );
+                items.push("<div id='" + key + j + " tag' class='tag tagValue '>" + singleTag + "</div>");})
                 items.push( "<div id='" + key + "' class='add-tag'>TAG IT!</div>" );
-                items.push("<input type='text' id='" + key + "input' class='tag_input' style='display:none' name='tag' amount=''>");
-                items.push( "</div>")
-                console.log(items);
+                items.push("<input type='text' id='" + key + "input' class='tag_input "+key+"' style='display:none' name='tag' amount=''>");
+                items.push( "</div>");
               })
               $( "<div/>", {
-                "class": "receiptList",
+                "id": "receiptList",
                 html: items.join( "" )
-              }).appendTo( $("#recList") );
+              }).appendTo( $("#container") );
               $(".add-tag").bind("click",showTagInput);
               $(".tag_input").bind("keypress",addTag);
               $(".tag").bind("click",deleteTag);
@@ -74,12 +72,12 @@
             }
         $("#add-receipt").bind("click",showReceiptInput);
         function showReceiptInput(){
-          $(".inputPanel").show();
+          $(".receiptPanel").show();
         };
         $("#cancel-receipt").bind("click",cancelReceipt);
         function cancelReceipt(){
           $("input[type=text], textarea").val("");
-          $(".inputPanel").hide();
+          $(".receiptPanel").hide();
         }
         $("#save-receipt").bind("click",saveReceipt);
         function saveReceipt(){
@@ -96,7 +94,7 @@
             }
           })
           $("input[type=text], textarea").val("");
-          $(".inputPanel").hide();
+          $(".receiptPanel").hide();
         }
         function fxxkdamnbugs(){
           alert('fxxkdamnbugs');
@@ -137,19 +135,16 @@
 <DIV id="container">
     <h1>My receipts</h1>
     <div class="button" id="add-receipt">+</div>
-    <div class="inputPanel" style="display:none">
-      <input type="text" id="merchant" class="receiptPanel" name="Merchant" amount="">
-      <input type="text" id="amount" class="receiptPanel" name="Amount" amount="">
-      <div class="button receiptButton" id="cancel-receipt">cancel</div>
-      <div class="button receiptButton" id="save-receipt">save</div>
-    </div>
-    <div id="recList">
+    <input type="text" id="merchant" class="receiptPanel" name="Merchant" amount="">
+    <input type="text" id="amount" class="receiptPanel" name="Amount" amount="">
+    <div class="button receiptButton receiptPanel" id="cancel-receipt">cancel</div>
+    <div class="button receiptButton receiptPanel" id="save-receipt">save</div>
+    <div>
       <div>Time</div>
       <div>Merchant</div>
       <div>$</div>
       <div>Tag</div>
     </div>
-</DIV>
 </body>
 
 </html>
