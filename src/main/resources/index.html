@@ -2,7 +2,6 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="style.css" />
     <script data-require="jquery@*" data-semver="3.1.1" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <style>
         #container {border: 1px solid brown;}
@@ -25,11 +24,14 @@
             border-radius: 8px;
             background-color: red;
         }
-        #receiptList {
+        #recList {
             border: 1px solid green;
             clear: both;
         }
-
+        .tagButton {
+            border: 1px solid green;
+            clear: both;
+        }
         .receipt {
             background-color: #eee;
             margin-bottom: 5px;
@@ -40,67 +42,87 @@
         // execute until the page has loaded
         $(function(){
             const api = "http://localhost:8080"; // <- do not need a root api URL if this page is served directly by the API
-
+            $(loadReceipts);
+            function loadReceipts() {
+            $(".receiptList").remove();
             $.getJSON(api+"/receipts", function(receipts){
               var items = [];
               $.each( receipts, function( key, val ) {
                 items.push( "<div id='" + key + "'>" + val.created + "</div>" );
-                items.push( "<div id='" + key + "'>" + val.merchantName + "</div>" );
-                items.push( "<div id='" + key + "'>" + val.value + "</div>" );
-                items.push( "<div id='" + key + "'>" + val.tags + "</div>" );
+                items.push( "<div id='" + key + "' class='merchant'>" + val.merchantName + "</div>" );
+                items.push( "<div id='" + key + "' class='amount'>" + val.value + "</div>" );
+                items.push( "<div id='" + key + " tag' class='tagamount tags'>" + val.tags + "</div>" );
+                items.push( "<div id='" + key + "' class='tagButton'>TAG IT!</div>" );
+                items.push("<input type='text' id='" + key + "input' class='tagPanel' style='display:none' name='tag' amount=''>");
+              })
               $( "<div/>", {
-                "class": "receipt-List",
+                "class": "receiptList",
                 html: items.join( "" )
-              }).appendTo( $("#receiptList") );
+              }).appendTo( $("#recList") );
+              $(".tagButton").bind("click",showTagInput);
+              $(".tagPanel").bind("keypress",addTag);
+
             })
-        })
-        $("#receiptButton").bind("click",function(){
+            }
+        $("#receiptButton").bind("click",function showReceiptInput(){
           $(".inputPanel").show();
         });
-        $("#cancelButton").bind("click",function(){
+        $("#cancelButton").bind("click",function cancelReceipt(){
           $("input[type=text], textarea").val("");
           $(".inputPanel").hide();
         })
 
-        $("#acceptButton").click(function saveReceipt(){
-          var merchant = $("#merchantName").val();
-          var amount = $("#value").val();
-          alert(amount);
-          item = {}
-          item ["\"merchant\""] = merchant;
-          item ["\"amount\""] = parseInt(amount);
-          console.log(item);
+        $("#acceptButton").bind("click",function saveReceipt(){
+          var merchant = $("#merchant").val();
+          var amount = $("#amount").val();
           $.ajax({
-            beforeSend: function(xhrObj){
-                xhrObj.setRequestHeader("Content-Type","application/json");
-                xhrObj.setRequestHeader("Accept","application/json");
-            },
             type: "POST",
             url: api+"/receipts",
-            data: JSON.stringify(item),
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            success: function(data){alert(data);},
+            data: JSON.stringify({"merchant": merchant, "amount": amount}),
+            contentType: "application/json",
+            success: function(data){$(loadReceipts)},
             failure: function(errMsg) {
               alert(errMsg);
             }
           })
         })
-      })
+        function fxxkyou(){
+          alert('fxxkyou');
+        }
+        function showTagInput(){
+          key = $(this).attr('id');
+          var inputId = "#"+key+"input"
+          $(inputId).show();
+        }
+        function addTag() {
+          var tagName = $(this).val();
+          key = parseInt($(this).attr('id').substring(0,1));
+          $.ajax({
+            type: "PUT",
+            url: api+'/tags/' + tagName,
+            data: JSON.stringify(key+1),
+            contentType: "application/json",
+            success: function(data){$(loadReceipts)},
+            failure: function(errMsg) {
+              alert(errMsg);
+            }
+          });
+      }
+    })
     </script>
 </head>
 
 <body>
 <DIV id="container">
     <h1>My receipts</h1>
-    <div class="button" id="receiptButton">+</div>
+    <div class="button" id="receiptButton add-receipt">+</div>
     <div class="inputPanel" style="display:none">
-      <input type="text" id="merchantName" class="receiptPanel" name="Merchant" value="">
-      <input type="text" id="value" class="receiptPanel" name="Amount" value="">
-      <div class="button receiptButton reset" id="cancelButton">+</div>
-      <div class="button receiptButton" id="acceptButton">+</div>
+      <input type="text" id="merchant" class="receiptPanel" name="Merchant" amount="">
+      <input type="text" id="amount" class="receiptPanel" name="Amount" amount="">
+      <div class="button receiptButton" id="cancelButton cancel-receipt">cancel</div>
+      <div class="button receiptButton" id="acceptButton save-receipt">save</div>
     </div>
-    <div id="receiptList">
+    <div id="recList">
       <div>Time</div>
       <div>Merchant</div>
       <div>$</div>
