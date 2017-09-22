@@ -2,311 +2,111 @@
 <html>
 
 <head>
+    <link rel="stylesheet" href="style.css" />
     <script data-require="jquery@*" data-semver="3.1.1" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-
-    <style type="text/css">
-        #container {border: 1px solid black;}
+    <style>
+        #container {border: 1px solid brown;}
         H1 {float: left;}
-        .button {
-          display: inline-block;
-          padding: 15px 25px;
-          font-size: 24px;
-          cursor: pointer;
-          text-align: center;
-          text-decoration: none;
-          outline: none;
-          color: #fff;
-          background-color: #4CAF50;
-          border: none;
-          border-radius: 15px;
-          box-shadow: 0 9px #999;
+
+        .button{
+            background-color:#55A;
+            border: 1px solid #229;
+            width: 100px;
+            float: right;
+            font-size: 2em;
+            color: white;
+            text-align: center;
         }
-        .button:hover {background-color: #3e8e41}
-        .button:active {
-          background-color: #3e8e41;
-          box-shadow: 0 5px #666;
-          transform: translateY(4px);
+        #cancelButton{
+            border-radius: 8px;
+            background-color: grey;
         }
-        .addReceiptPanel {
-            background-color: transparent;
-            border-radius: 15px;
-            border-width: 1px;
-            margin-left: 20px;
-            margin-right: 20px;
-            padding-bottom: 10px;
-          }
+        #acceptButton{
+            border-radius: 8px;
+            background-color: red;
+        }
         #receiptList {
             border: 1px solid green;
             clear: both;
-          }
+        }
+
         .receipt {
-            background-color: #clear;
+            background-color: #eee;
             margin-bottom: 5px;
-          }
-        .table {
-            background-color: #cee2f4;    }
-        .add-tag {
-            margin-top: 10px;
-            margin-bottom: 10px;
-            margin-left: 20px;
-            margin-right: 20px;
-            background-color: #6b9cee;
-            color: #fff;
-            border-radius: 8px;
-            border-style: solid;
-            border-width: 1px;
-            width: 30%;
-    }
-        .tagValue {
-            margin-left: 5px;
-            margin-right: 5px;
-            margin-top: 5px;
-            margin-bottom: 5px;
-            background-color: #transparent;
-            border-radius: 5px;
-            border-style: solid;
-            border-width: 1px;    }
-        .removeTagButtom {
-            background-color: transparent;
-        }
-        .receiptInput {
-            width: 70%;
-            height: 30px;
-            margin: 10px;
-            background-color: transparent;
-            color: black;
-            font-size: 20px;
-            padding-left: 5px;
-        }
-        .panelButton {
-            margin: 15px;
-            border-radius: 8px;
-            border-style: solid;
-            border-width: 1px;
-            font-size: 100%;
-            font-weight:bold;
-            color: white;
-            text-align: center;
-            width: 70px;
-            height: 40px;
-        }
-        .panelError {
-            width: 70%;
-            border-radius: 5px;
-            background-color: #fff;
-            color: red;
-            font-size: 18px;
-            font-style: Bold;
-        }
-        .tagInput {
-            margin-bottom: 5px;
-            border-radius: 3px;
-            border-style: solid;
-            border-width: 1px;
-            width: 25%;
-        }
-        .tagButton {
-            margin: 5px;
-            border-radius: 2px;
-            border-style: solid;
-            border-width: 1px;
-            font-size: 100%;
-            font-weight:bold;
-            color: white;
-            text-align: center;
-            width: 40px;
-            height: 20px;
-        }
-        ::-webkit-input-placeholder {
-            color: #fff;
-            font-style: italic;
-            font-size: 20px;
-            padding-left: 5px;
         }
     </style>
-
     <script>
-        // server domain:port
-        const api = "";
+        // This is the idiomatic way to ensure that JQuery does not
+        // execute until the page has loaded
+        $(function(){
+            const api = "http://localhost:8080"; // <- do not need a root api URL if this page is served directly by the API
 
-        // load the save all receips
-        var allReceipts;
-        $(reloadReceipts)
-        function reloadReceipts() {
-            // clear current content
-            $(".receipt").remove();
             $.getJSON(api+"/receipts", function(receipts){
-                allReceipts = receipts
-                for(var i=0; i < receipts.length; i++) {
-                    var receipt = receipts[i];
-                    var tagHTML = '';
-                    $.each(receipt.tags, function (j, item) {
-                        tagHTML += '<div class="tagValue" onclick="removeTag(' + i +',' + j + ')">' + item + '&ensp;<button class="removeTagButtom">&#10005;</button></div>';
-                    })
-                    tagHTML += '<button class="add-tag" onclick="showTagInput('+ i + ')"> Add +</button>';
-                    tagHTML = '<div class="tags">' + tagHTML + '</div>';
-                    $(`<div class="receipt">
-                            <div class="time">${receipt.created}</div>
-                            <div class="merchant">${receipt.merchantName}</div>
-                            <div class="amount">${receipt.value}</div>
-                            ${tagHTML}
-                        </div>`)
-                        .appendTo($("#receiptList"));
-                }
+              var items = [];
+              $.each( receipts, function( key, val ) {
+                items.push( "<div id='" + key + "'>" + val.created + "</div>" );
+                items.push( "<div id='" + key + "'>" + val.merchantName + "</div>" );
+                items.push( "<div id='" + key + "'>" + val.value + "</div>" );
+                items.push( "<div id='" + key + "'>" + val.tags + "</div>" );
+              $( "<div/>", {
+                "class": "receipt-List",
+                html: items.join( "" )
+              }).appendTo( $("#receiptList") );
             })
-        }
-    </script>
+        })
+        $("#receiptButton").bind("click",function(){
+          $(".inputPanel").show();
+        });
+        $("#cancelButton").bind("click",function(){
+          $("input[type=text], textarea").val("");
+          $(".inputPanel").hide();
+        })
 
+        $("#acceptButton").click(function saveReceipt(){
+          var merchant = $("#merchantName").val();
+          var amount = $("#value").val();
+          alert(amount);
+          item = {}
+          item ["\"merchant\""] = merchant;
+          item ["\"amount\""] = parseInt(amount);
+          console.log(item);
+          $.ajax({
+            beforeSend: function(xhrObj){
+                xhrObj.setRequestHeader("Content-Type","application/json");
+                xhrObj.setRequestHeader("Accept","application/json");
+            },
+            type: "POST",
+            url: api+"/receipts",
+            data: JSON.stringify(item),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function(data){alert(data);},
+            failure: function(errMsg) {
+              alert(errMsg);
+            }
+          })
+        })
+      })
+    </script>
 </head>
 
 <body>
 <DIV id="container">
-    <h1 style="margin: 25px">My receipts</h1>
-    <button class="button" id="add-receipt" style="margin: 20px" onclick="showPanel()">+</button>
-    <div id="panelView" style="clear: both; text-align: center;"></div>
-    <div id="receiptList" style="margin: 30px">
-          <div>
-            <div>Time</div>
-            <div>Merchant</div>
-            <div>$</div>
-            <div>Tags</div>
-          </div>
+    <h1>My receipts</h1>
+    <div class="button" id="receiptButton">+</div>
+    <div class="inputPanel" style="display:none">
+      <input type="text" id="merchantName" class="receiptPanel" name="Merchant" value="">
+      <input type="text" id="value" class="receiptPanel" name="Amount" value="">
+      <div class="button receiptButton reset" id="cancelButton">+</div>
+      <div class="button receiptButton" id="acceptButton">+</div>
+    </div>
+    <div id="receiptList">
+      <div>Time</div>
+      <div>Merchant</div>
+      <div>$</div>
+      <div>Tag</div>
     </div>
 </DIV>
 </body>
-
-<!-- UI related functions -->
-
-<script type="text/javascript">
-    function cancelAdding () {
-        hidePanel();
-    }
-    function saveAdding () {
-        var merchantName = $('#merchant').val();
-        var amountValue = $('#amount').val();
-        if (merchantName == "") {
-            setErrorMessage('Please input Merchant name!');
-            return;
-        }
-        if (amountValue != '' && !$.isNumeric(amountValue)) {
-            setErrorMessage('Please input numberic Amount value!');
-            return;
-        }
-        var parameters = {"merchant": merchantName, "amount": amountValue};
-        AJAX_createReceipt(parameters);
-    }
-    function setErrorMessage(message) {
-        $('#panelErrorView').text(message);
-    }
-    function clearErrorMessage() {
-        $('#panelErrorView').text('');
-    }
-    function removeTag(recordInd, tagInd) {
-        var thisRecord = allReceipts[recordInd]
-        var recordId = thisRecord.id;
-        var tagName = thisRecord.tags[tagInd];
-        AJAX_updateTag(recordId, tagName);
-    }
-    function showPanel() {
-        // load template for add receipt panel
-        var template = $('#addReceip-template').html();
-        $('#panelView').append(template);
-        $("#add-receipt").attr("disabled", true);
-    }
-    function hidePanel() {
-        $(".addReceiptPanel").remove();
-        $("#add-receipt").attr("disabled", false);
-    }
-    function showTagInput(recordIndex) {
-        // load template for tag name input
-        var template = $('#tagInput-template').html();
-        var thisRecord = allReceipts[recordIndex]
-        var thisReceipt = $(".receipt")[recordIndex];
-        var thisTagNode = $(".tags", thisReceipt);
-        thisTagNode.append(template);
-        $(".add-tag", thisReceipt).attr("disabled", true);
-        $(".tag_input", thisTagNode).on('keypress', function (e) {
-            if(e.which === 13){
-                var tagName = $(this).val();
-                if (tagName == '') return;
-                $(this).attr("disabled", "disabled");
-                AJAX_updateTag(thisRecord.id, tagName, thisTagNode);
-            }
-        });
-    }
-    function hideTagInput(tagNode) {
-        $(".tag_input", tagNode).attr("disabled",false);
-        $("#cancel-tag").attr("disabled",false);
-        $("#save-tag").attr("disabled",false);
-    }
-</script>
-
-<!-- AJAX -->
-
-<script type="text/javascript">
-    function AJAX_createReceipt(parameters) {
-        $.ajax({
-            beforeSend: function(xhrObj){
-                xhrObj.setRequestHeader("Content-Type","application/json");
-                xhrObj.setRequestHeader("Accept","application/json");
-            },
-            url: api+'/receipts',
-            type: 'POST',
-            data: JSON.stringify(parameters),
-            success: function(result) {
-                clearErrorMessage();
-                hidePanel();
-                $(reloadReceipts)
-            },
-            error: function(jqXHR, exception) {
-                var err = 'Error: ' + jqXHR.responseText;
-                setErrorMessage(err);
-            }
-        })
-    }
-    function AJAX_updateTag(recordId, tagName, tagNode) {
-        $.ajax({
-            beforeSend: function(xhrObj){
-                xhrObj.setRequestHeader("Content-Type","application/json");
-                xhrObj.setRequestHeader("Accept","application/json");
-            },
-            url: api+'/tags/' + tagName,
-            type: 'PUT',
-            data: JSON.stringify(recordId),
-            success: function(result) {
-                if (tagNode != null) {
-                }
-                $(reloadReceipts)
-            },
-            error: function(jqXHR, exception) {
-                var err = 'Error: ' + jqXHR.responseText;
-                setErrorMessage(err);
-            }
-        })
-    }
-</script>
-
-<!-- template for add receipt panel and tag name input -->
-<script id="addReceip-template" type="text/zz-template">
-    <div class="addReceiptPanel">
-        <label for="merchant">Merchant:</label>
-        <input type="text" id="merchant" class="receiptInput" style="color:black" name="merchantName" placeholder="merchant"><br>
-        <label for="amount">Amount:</label>
-        <input type="text" id="amount" class="receiptInput" name="amountValue" placeholder="amount"><br>
-        <div style="display: flex; justify-content: flex-end; width: 85%">
-            <button class="panelButton" id="cancel-receipt" onclick="cancelAdding()">cancel</button>
-            <button class="panelButton" id="save-receipt" style="background-color: red" onclick="saveAdding()">save</button>
-        </div>
-        <center><div id="panelErrorView" class="panelError"></div></center>
-    </div>
-</script>
-
-<script id="tagInput-template" type="text/zz-template">
-    <div>
-        <input type="text" class="tag_input" name="tagInput"><br>
-        <div style="display: flex; justify-content: flex-end; width: 50%">
-        </div>
-    </div>
-</script>
 
 </html>
