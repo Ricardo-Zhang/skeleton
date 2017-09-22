@@ -28,7 +28,7 @@
             border: 1px solid green;
             clear: both;
         }
-        .tagButton {
+        .add-tag {
             border: 1px solid green;
             clear: both;
         }
@@ -48,31 +48,41 @@
             $.getJSON(api+"/receipts", function(receipts){
               var items = [];
               $.each( receipts, function( key, val ) {
+                var tags = [];
+                $.each(val.tags,function (j, singleTag){
+                tags.push("<div id='" + key + " tag' class='tag tagValue'>" + singleTag + "</div>");
+                })
+                items.push( "<div class='receipt'>")
                 items.push( "<div id='" + key + "'>" + val.created + "</div>" );
                 items.push( "<div id='" + key + "' class='merchant'>" + val.merchantName + "</div>" );
                 items.push( "<div id='" + key + "' class='amount'>" + val.value + "</div>" );
-                items.push( "<div id='" + key + " tag' class='tagamount tags'>" + val.tags + "</div>" );
-                items.push( "<div id='" + key + "' class='tagButton'>TAG IT!</div>" );
-                items.push("<input type='text' id='" + key + "input' class='tagPanel' style='display:none' name='tag' amount=''>");
+                items.push(tags);
+                //items.push( "<div id='" + key + " tag' class='tag tags'>" + val.tags + "</div>" );
+                items.push( "<div id='" + key + "' class='add-tag'>TAG IT!</div>" );
+                items.push("<input type='text' id='" + key + "input' class='tag_input' style='display:none' name='tag' amount=''>");
+                items.push( "</div>")
+                console.log(items);
               })
               $( "<div/>", {
                 "class": "receiptList",
                 html: items.join( "" )
               }).appendTo( $("#recList") );
-              $(".tagButton").bind("click",showTagInput);
-              $(".tagPanel").bind("keypress",addTag);
-
+              $(".add-tag").bind("click",showTagInput);
+              $(".tag_input").bind("keypress",addTag);
+              $(".tag").bind("click",deleteTag);
             })
             }
-        $("#receiptButton").bind("click",function showReceiptInput(){
+        $("#add-receipt").bind("click",showReceiptInput);
+        function showReceiptInput(){
           $(".inputPanel").show();
-        });
-        $("#cancelButton").bind("click",function cancelReceipt(){
+        };
+        $("#cancel-receipt").bind("click",cancelReceipt);
+        function cancelReceipt(){
           $("input[type=text], textarea").val("");
           $(".inputPanel").hide();
-        })
-
-        $("#acceptButton").bind("click",function saveReceipt(){
+        }
+        $("#save-receipt").bind("click",saveReceipt);
+        function saveReceipt(){
           var merchant = $("#merchant").val();
           var amount = $("#amount").val();
           $.ajax({
@@ -85,9 +95,11 @@
               alert(errMsg);
             }
           })
-        })
-        function fxxkyou(){
-          alert('fxxkyou');
+          $("input[type=text], textarea").val("");
+          $(".inputPanel").hide();
+        }
+        function fxxkdamnbugs(){
+          alert('fxxkdamnbugs');
         }
         function showTagInput(){
           key = $(this).attr('id');
@@ -97,17 +109,26 @@
         function addTag() {
           var tagName = $(this).val();
           key = parseInt($(this).attr('id').substring(0,1));
+          $(updateTag(key+1,tagName));
+        }
+        function deleteTag(){
+          var tagName = $(this).text();
+          console.log(tagName)
+          key = parseInt($(this).attr('id').substring(0,1));
+          $(updateTag(key+1,tagName));
+        }
+        function updateTag(id,tagName){
           $.ajax({
             type: "PUT",
             url: api+'/tags/' + tagName,
-            data: JSON.stringify(key+1),
+            data: JSON.stringify(id),
             contentType: "application/json",
             success: function(data){$(loadReceipts)},
             failure: function(errMsg) {
               alert(errMsg);
             }
           });
-      }
+        }
     })
     </script>
 </head>
@@ -115,12 +136,12 @@
 <body>
 <DIV id="container">
     <h1>My receipts</h1>
-    <div class="button" id="receiptButton add-receipt">+</div>
+    <div class="button" id="add-receipt">+</div>
     <div class="inputPanel" style="display:none">
       <input type="text" id="merchant" class="receiptPanel" name="Merchant" amount="">
       <input type="text" id="amount" class="receiptPanel" name="Amount" amount="">
-      <div class="button receiptButton" id="cancelButton cancel-receipt">cancel</div>
-      <div class="button receiptButton" id="acceptButton save-receipt">save</div>
+      <div class="button receiptButton" id="cancel-receipt">cancel</div>
+      <div class="button receiptButton" id="save-receipt">save</div>
     </div>
     <div id="recList">
       <div>Time</div>
