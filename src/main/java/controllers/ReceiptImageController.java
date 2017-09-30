@@ -6,6 +6,7 @@ import com.google.protobuf.ByteString;
 import java.math.BigDecimal;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.*;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -23,6 +24,9 @@ public class ReceiptImageController {
         Feature ocrFeature = Feature.newBuilder().setType(Feature.Type.TEXT_DETECTION).build();
         this.requestBuilder = AnnotateImageRequest.newBuilder().addFeatures(ocrFeature);
 
+    }
+    public static boolean isNumeric(String str) {
+        return str.matches("-?\\d+(\\.\\d+)?");  //match a number with optional '-' and decimal.
     }
 
     /**
@@ -47,6 +51,7 @@ public class ReceiptImageController {
 
             String merchantName = null;
             BigDecimal amount = null;
+            List<String> merchantNameList = new ArrayList<String>();
 
             // Your Algo Here!!
             // Sort text annotations by bounding polygon.  Top-most non-decimal text is the merchant
@@ -54,7 +59,21 @@ public class ReceiptImageController {
             for (EntityAnnotation annotation : res.getTextAnnotationsList()) {
                 out.printf("Position : %s\n", annotation.getBoundingPoly());
                 out.printf("Text: %s\n", annotation.getDescription());
+                if (isNumeric(annotation.getDescription())) {
+                  amount = new BigDecimal(annotation.getDescription());
+                }
+                else {
+                  merchantName = annotation.getDescription();
+                }
             }
+            for (EntityAnnotation annotation : res.getTextAnnotationsList()) {
+                if (!isNumeric(annotation.getDescription())) {
+                  merchantName = annotation.getDescription();
+                  break;
+                }
+            }
+            String lines[] = merchantName.split("\\r?\\n");
+            merchantName = lines[0];
 
             //TextAnnotation fullTextAnnotation = res.getFullTextAnnotation();
             return new ReceiptSuggestionResponse(merchantName, amount);

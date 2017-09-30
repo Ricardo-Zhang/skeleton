@@ -3,6 +3,8 @@
 
 <head>
     <script data-require="jquery@*" data-semver="3.1.1" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <style>
         #container {border: 1px solid brown;}
         H1 {float: left;}
@@ -18,6 +20,9 @@
         body {
             text-align: center;
         }
+        .rTable {   	display: table;   	width: 100%; }
+        .rTableRow {   	display: table-row; }
+        .rTableHeading {   	display: table-header-group;   	background-color: #ddd; }
         #cancelButton{
             border-radius: 8px;
             background-color: grey;
@@ -35,30 +40,13 @@
             clear: both;
         }
         .receipt {
+            display: table-row;
             background-color: #eee;
             margin-bottom: 5px;
         }
         .receiptPanel {
             display: none;
         }
-    </style>
-
-</head>
-
-<body>
-<DIV id="container">
-    <h1>My receipts</h1>
-    <div class="button" id="add-receipt">+</div>
-    <input type="text" id="merchant" class="receiptPanel" name="Merchant" amount="">
-    <input type="text" id="amount" class="receiptPanel" name="Amount" amount="">
-    <div class="button receiptButton receiptPanel" id="cancel-receipt">cancel</div>
-    <div class="button receiptButton receiptPanel" id="save-receipt">save</div>
-    <div>
-      <div>Time</div>
-      <div>Merchant</div>
-      <div>$</div>
-      <div>Tag</div>
-
         video {
             width: 400px;
             height: 300px;
@@ -72,6 +60,9 @@
         #start, #snapshot {
             height: 3em;
         }
+        .photoPanel {
+          display: none
+        }
     </style>
     <script>
         let imageCapture;
@@ -83,7 +74,7 @@
             const track = mediaStream.getVideoTracks()[0];
             imageCapture = new ImageCapture(track);
         }
-
+        $
         function startVideo() {
             navigator.mediaDevices.getUserMedia({video: {facingMode: {exact: "environment"}}})
                 .then(attachMediaStream)
@@ -115,8 +106,19 @@
                         success: function() {},
                    })
                     .then(response => {
-                        $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
+                      console.log(response);
+                      $('.photoPanel').hide();
+                      $('#add-receipt').click();
+                      console.log(response.merchantName);
+                      console.log(response.amount);
+                      $('#merchant').val(response.merchantName);
+                      $('#amount').val(response.amount);
+                      $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
                     })
+                    // .then(response => {
+                    //     alert(response)
+
+                    // })
                     .always(() => console.log('request complete'));
 
                     // For debugging, you can uncomment this to see the frame that was captured
@@ -130,16 +132,40 @@
             $('video').on('play', () => $('#snapshot').prop('disabled', false));
             $('#snapshot').on('click', takeSnapshot);
         });
+
+
     </script>
+    </head>
 </head>
 
 <body>
-<button id="start">Start Video</button>
-<button id="snapshot" disabled="true">Take a Snapshot!</button>
-<br>
-<div id="vidwrap">
-    <video autoplay></video>
+<DIV id="container">
+    <h1>My receipts</h1>
+    <div class="button" id="add-receipt">+</div>
+    <div class="button" id="start-camera">
+      <span class="glyphicon glyphicon-camera"></span>
     </div>
+    <input type="text" id="merchant" class="receiptPanel" name="Merchant" amount="">
+    <input type="text" id="amount" class="receiptPanel" name="Amount" amount="">
+    <div class="button receiptButton receiptPanel" id="cancel-receipt">cancel</div>
+    <div class="button receiptButton receiptPanel" id="save-receipt">save</div>
+    <div class="rTable">
+      <div class="rTableRow">
+        <div class="rTableHeading">Time</div>
+        <div class="rTableHeading">Merchant</div>
+        <div class="rTableHeading">$</div>
+        <div class="rTableHeading">Tag</div>
+      </div>
+    </div>
+
+<button class="photoPanel" id="start">Start Video</button>
+<button class="photoPanel" id="snapshot" disabled="true">Take a Snapshot!</button>
+<button class="photoPanel" id="take-pic-cancel" disabled="true">cancel!</button>
+<div class="photoPanel" id="vidwrap">
+    <video autoplay></video>
+</div>
+</div>
+
 </body>
 
 <script>
@@ -154,12 +180,12 @@
         $.getJSON(api+"/receipts", function(receipts){
           var items = [];
           $.each( receipts, function( key, val ) {
-            items.push( "<div class=receipt>");
-            items.push( "<div>" + val.created + "</div>" );
-            items.push( "<div class='merchant'>" + val.merchantName + "</div>" );
-            items.push( "<div class='amount'>" + val.value + "</div>" );
+            items.push( "<div class= 'receipt' >");
+            items.push( "<div class ='rTableCell'>" + val.created + "</div>" );
+            items.push( "<div class='merchant rTableCell'>" + val.merchantName + "</div>" );
+            items.push( "<div class='amount rTableCell'>" + val.value + "</div>" );
             $.each(val.tags,function (j, singleTag){
-            items.push("<div id='" + key + j + " tag' class='tag tagValue '>" + singleTag + "</div>");})
+            items.push("<div id='" + key + j + " tag' class='tag tagValue rTableCell'>" + singleTag + "</div>");})
             items.push( "<div id='" + key + "' class='add-tag'>TAG IT!</div>" );
             items.push("<input type='text' id='" + key + "input' class='tag_input' style='display:none' name='tag' amount=''>");
             items.push( "</div>");
@@ -168,7 +194,7 @@
             "id": "receiptList",
             html: items.join( "" )
           }).appendTo( $("#container") );
-          $(".add-tag").bind("click",showTagInput);
+          $(".add-tag").on("click",showTagInput);
           $(".tag_input").on("keypress",function(e){
             if(e.keyCode == 13){
               var tagName = $(this).val();
@@ -177,24 +203,22 @@
             }
 
           });
-          $(".tag").bind("click",deleteTag);
+          $(".tag").on("click",deleteTag);
         })
         }
-
+    $('#start-camera').on('click',function(){
+        $('.photoPanel').show();
+    });
     $("#add-receipt").on("click",function(){
       $(".receiptPanel").show();
     });
-    // function showReceiptInput(){
-    //
-    // };
-
-    $("#cancel-receipt").bind("click",cancelReceipt);
+    $("#cancel-receipt").on("click",cancelReceipt);
     function cancelReceipt(){
       $("input[type=text], textarea").val("");
       $(".receiptPanel").hide();
     }
 
-    $("#save-receipt").bind("click",saveReceipt);
+    $("#save-receipt").on("click",saveReceipt);
     function saveReceipt(){
       var merchant = $("#merchant").val();
       var amount = $("#amount").val();
