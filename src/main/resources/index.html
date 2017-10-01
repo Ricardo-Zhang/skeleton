@@ -57,84 +57,11 @@
             margin: 20px 0;
         }
 
-        #start, #snapshot {
+        #start, #take-pic {
             height: 3em;
         }
-        .photoPanel {
-          display: none
-        }
     </style>
-    <script>
-        let imageCapture;
 
-        function attachMediaStream(mediaStream) {
-            $('video')[0].srcObject = mediaStream;
-
-            // Saving the track allows us to capture a photo
-            const track = mediaStream.getVideoTracks()[0];
-            imageCapture = new ImageCapture(track);
-        }
-        $
-        function startVideo() {
-            navigator.mediaDevices.getUserMedia({video: {facingMode: {exact: "environment"}}})
-                .then(attachMediaStream)
-                .catch(error => {
-                    navigator.mediaDevices.getUserMedia({video: true})
-                        .then(attachMediaStream)
-                        .catch(error => {
-                            console.log('you are fooked');
-                        })
-                })
-        }
-
-        function takeSnapshot() {
-            // create a CANVAS element that is same size as the image
-            imageCapture.takePhoto()
-                .then(blob => createImageBitmap(blob))
-                .then(img => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-
-                    canvas.getContext('2d').drawImage(img, 0, 0);
-                    const base64EncodedImageData = canvas.toDataURL('image/png').split(',')[1];
-                    $.ajax({
-                        url: "/images",
-                        type: "POST",
-                        data: base64EncodedImageData,
-                        contentType: "text/plain",
-                        success: function() {},
-                   })
-                    .then(response => {
-                      console.log(response);
-                      $('.photoPanel').hide();
-                      $('#add-receipt').click();
-                      console.log(response.merchantName);
-                      console.log(response.amount);
-                      $('#merchant').val(response.merchantName);
-                      $('#amount').val(response.amount);
-                      $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
-                    })
-                    // .then(response => {
-                    //     alert(response)
-
-                    // })
-                    .always(() => console.log('request complete'));
-
-                    // For debugging, you can uncomment this to see the frame that was captured
-                    // $('BODY').append(canvas);
-                });
-
-        }
-
-        $(function () {
-            $('#start').on('click', startVideo);
-            $('video').on('play', () => $('#snapshot').prop('disabled', false));
-            $('#snapshot').on('click', takeSnapshot);
-        });
-
-
-    </script>
     </head>
 </head>
 
@@ -157,13 +84,8 @@
         <div class="rTableHeading">Tag</div>
       </div>
     </div>
+    <div id="photoPanelLoc"></div>
 
-<button class="photoPanel" id="start">Start Video</button>
-<button class="photoPanel" id="snapshot" disabled="true">Take a Snapshot!</button>
-<button class="photoPanel" id="take-pic-cancel" disabled="true">cancel!</button>
-<div class="photoPanel" id="vidwrap">
-    <video autoplay></video>
-</div>
 </div>
 
 </body>
@@ -206,9 +128,7 @@
           $(".tag").on("click",deleteTag);
         })
         }
-    $('#start-camera').on('click',function(){
-        $('.photoPanel').show();
-    });
+
     $("#add-receipt").on("click",function(){
       $(".receiptPanel").show();
     });
@@ -236,17 +156,11 @@
       $(".receiptPanel").hide();
     }
 
-    function fxxkdamnbugs(){
-      alert('fxxkdamnbugs');
-    }
-
     function showTagInput(){
       key = $(this).attr('id');
       var inputId = "#"+key+"input"
       $(inputId).show();
     }
-
-
 
     function deleteTag(){
       var tagName = $(this).text();
@@ -267,7 +181,98 @@
         }
       });
     }
+//photoPanel functions
+    $('#start-camera').on('click',function () {
+      var template = $('#addPhotoPanel').html();
+      $('#photoPanelLoc').append(template);
+      startVideo();
+    });
 
 </script>
+<script>
+    let imageCapture;
 
+    function attachMediaStream(mediaStream) {
+        $('video')[0].srcObject = mediaStream;
+
+        // Saving the track allows us to capture a photo
+        const track = mediaStream.getVideoTracks()[0];
+        imageCapture = new ImageCapture(track);
+    }
+
+    function startVideo() {
+        navigator.mediaDevices.getUserMedia({video: {facingMode: {exact: "environment"}}})
+            .then(attachMediaStream)
+            .catch(error => {
+                navigator.mediaDevices.getUserMedia({video: true})
+                    .then(attachMediaStream)
+                    .catch(error => {
+                        console.log('you are fooked');
+                    })
+            })
+    }
+
+    function takeSnapshot() {
+        // create a CANVAS element that is same size as the image
+        imageCapture.takePhoto()
+            .then(blob => createImageBitmap(blob))
+            .then(img => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                const base64EncodedImageData = canvas.toDataURL('image/png').split(',')[1];
+                $.ajax({
+                    url: "/images",
+                    type: "POST",
+                    data: base64EncodedImageData,
+                    contentType: "text/plain",
+                    success: function() {},
+               })
+                .then(response => {
+                  console.log(response);
+                  $('.photoPanel').remove();
+                  $('#take-pic').attr("disabled",true);
+                  $('#add-receipt').click();
+                  console.log(response.merchantName);
+                  console.log(response.amount);
+                  $('#merchant').val(response.merchantName);
+                  $('#amount').val(response.amount);
+                  $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
+                })
+                // .then(response => {
+                //     alert(response)
+
+                // })
+                .always(() => console.log('request complete'));
+
+                // For debugging, you can uncomment this to see the frame that was captured
+                $('BODY').append(canvas);
+            });
+
+    }
+
+    function video_onplay() {
+      $('#take-pic').attr('disabled', false);
+    }
+
+    function removePhotoPanel() {
+      $('.PhotoPanel').remove();
+      $("#take-pic").attr("disabled", false);
+    }
+
+</script>
+<script id = "addPhotoPanel" type = "template/photoPanel-template">
+  <div class = "add-PhotoPanel">
+    <button class="photoPanel" id="take-pic" onclick="takeSnapshot()">
+      Take a Snapshot!
+    </button>
+    <button class="photoPanel" id="take-pic-cancel" onclick="removePhotoPanel">cancel!</button>
+    <div class="photoPanel" id="vidwrap">
+        <video id='videoPlay' autoplay onplay="video_onplay"></video>
+    </div>
+    <script> getElementsbyId.play();</script>
+  </div>
+  </script>
 </html>
