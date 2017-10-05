@@ -6,46 +6,140 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <style>
-        #container {border: 1px solid brown;}
-        H1 {float: left;}
+        #container {
+          box-shadow: 0px 0px 3px #888888;
+          width: 85%;
+          height: 100%;
+          position: absolute;
+          display:block;
+          max-width: 85%;
+          max-height: 100%;
+          margin : 0 auto;
+          padding-top: 10px;
+          padding-bottom: 10px;
+          padding-left: 10px;
+          padding-right: 10px;
+        }
+        H1 {
+            float: left;
+        }
 
          .button{
-             background-color:#55A;
-             border: 1px solid #229;
+             background-color:#c90000;
+             border: 1px solid white;
              width: 100px;
              float: right;
              font-size: 2em;
              color: white;
            }
+         .receiptButton{
+             background-color:#c90000;
+             border: 1px solid white;
+             width: 80px;
+             height: 100%;
+             font-size: 1.5em;
+             color: white;
+           }
         body {
             text-align: center;
         }
-        .rTable {   	display: table;   	width: 100%; }
-        .rTableRow {   	display: table-row; }
-        .rTableHeading {   	display: table-header-group;   	background-color: #ddd; }
-        #cancelButton{
-            border-radius: 8px;
-            background-color: grey;
+        label{
+            display:inline-block;
+            width:200px;
         }
-        #acceptButton{
-            border-radius: 8px;
-            background-color: red;
+        input{
+            position: relative;
+            display: block;
+            margin : 0 auto;
         }
-        #recList {
-            border: 1px solid green;
+        .rTable {
+          width:100%;
+          text-align: center;
+          display: table;
+          align-items: center;
+        }
+        .rTableRow {
+          display: table-row;
+          background-color: #cee2f4;
+        }
+        .rTableHeading {
+          display: table-header-group;
+          float: left;
+          padding-top: 1%;
+          padding-bottom: 1%;
+          height: 50px;
+          overflow: hidden;
+          width: 25%;
+        }
+        .rTableCell {
+          display: table-cell;
+          float: left;
+          padding-top: 20%;
+          padding-bottom: 20%;
+          overflow: hidden;
+          padding: 1px 1.8%;
+          width: 25%;
+        }
+        #add-PhotoPanel {
+          clear: both;
+          text-align: center;
+          display: block;
+          box-shadow: 0px 0px 5px #888888;
+          background-color: white;
+          margin: auto;
+          position: absolute;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          right: 0;
+          max-width: 80%;
+        }
+        #receiptInputPanel {
             clear: both;
+            text-align: center;
+            box-shadow: 0px 0px 5px #888888;
+            background-color: white;
+            margin: auto;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            max-width: 277px;
+            height: 320px;
         }
+        #cancel-receipt{
+            border-radius: 3px;
+            background-color: lightgrey;
+        }
+        #save-receipt{
+            border-radius: 3px;
+            background-color: #c90000;
+            opacity: 0.7;
+        }
+        #receiptList {
+            display: table-row-group;
+        }
+
         .add-tag {
             border: 1px solid green;
             clear: both;
         }
-        .receipt {
-            display: table-row;
-            background-color: #eee;
-            margin-bottom: 5px;
-        }
+
         .receiptPanel {
             display: none;
+        }
+        #take-pic {
+          border-radius: 3px;
+          background-color: #c90000;
+          color: white;
+          height: 3em;
+        }
+        #take-pic-cancel {
+          border-radius: 3px;
+          color: white;
+          height: 3em;
+          background-color: lightgrey;
         }
         video {
             width: 400px;
@@ -67,16 +161,27 @@
 
 <body>
 <DIV id="container">
-    <h1>My receipts</h1>
+  <div>
+    <h1>My Receipts</h1>
     <div class="button" id="add-receipt">+</div>
     <div class="button" id="start-camera">
       <span class="glyphicon glyphicon-camera"></span>
     </div>
-    <input type="text" id="merchant" class="receiptPanel" name="Merchant" amount="">
-    <input type="text" id="amount" class="receiptPanel" name="Amount" amount="">
-    <div class="button receiptButton receiptPanel" id="cancel-receipt">cancel</div>
-    <div class="button receiptButton receiptPanel" id="save-receipt">save</div>
-    <div class="rTable">
+  </div>
+  <br>
+  <div id="photoPanelLoc"></div>
+
+  <div class="receiptPanel" id="receiptInputPanel">
+    <label style="padding-top:50px">Merchant Name: </label><input type="text" id="merchant" class="receiptPanel" name="Merchant" amount=""><br>
+    <label>Amount: </label><input type="text" id="amount" class="receiptPanel" name="Amount" amount=""><br>
+    <br><br>
+    <div style="display: flex; justify-content: flex-end; width: 80%">
+      <div class=" receiptButton receiptPanel" id="save-receipt">save</div>
+      <div style="width:4%"></div>
+      <div class=" receiptButton receiptPanel" id="cancel-receipt">cancel</div>
+    </div>
+  </div>
+    <div class="rTable" id="receiptTable">
       <div class="rTableRow">
         <div class="rTableHeading">Time</div>
         <div class="rTableHeading">Merchant</div>
@@ -84,38 +189,37 @@
         <div class="rTableHeading">Tag</div>
       </div>
     </div>
-    <div id="photoPanelLoc"></div>
-
-</div>
+</DIV>
 
 </body>
 
 <script>
     // This is the idiomatic way to ensure that JQuery does not
     // execute until the page has loaded
-
+//$(document).ready(function(){
         const api = ""; // <- do not need a root api URL if this page is served directly by the API
         $(loadReceipts);
-
         function loadReceipts() {
         $("#receiptList").remove();
         $.getJSON(api+"/receipts", function(receipts){
           var items = [];
           $.each( receipts, function( key, val ) {
-            items.push( "<div class= 'receipt' >");
+            items.push( "<div class= 'receipt rTableRow'>");
             items.push( "<div class ='rTableCell'>" + val.created + "</div>" );
             items.push( "<div class='merchant rTableCell'>" + val.merchantName + "</div>" );
             items.push( "<div class='amount rTableCell'>" + val.value + "</div>" );
+            items.push( "<div class='rTableCell'>")
             $.each(val.tags,function (j, singleTag){
-            items.push("<div id='" + key + j + " tag' class='tag tagValue rTableCell'>" + singleTag + "</div>");})
+            items.push("<div id='" + key + j + " tag' class='tag tagValue'>" + singleTag + "</div>");})
             items.push( "<div id='" + key + "' class='add-tag'>TAG IT!</div>" );
             items.push("<input type='text' id='" + key + "input' class='tag_input' style='display:none' name='tag' amount=''>");
+            items.push("</div>")
             items.push( "</div>");
           })
           $( "<div/>", {
             "id": "receiptList",
             html: items.join( "" )
-          }).appendTo( $("#container") );
+          }).appendTo( $("#receiptTable") );
           $(".add-tag").on("click",showTagInput);
           $(".tag_input").on("keypress",function(e){
             if(e.keyCode == 13){
@@ -182,13 +286,13 @@
       });
     }
 //photoPanel functions
-    $('#start-camera').on('click',function () {
+  $('#start-camera').on('click',function () {
       var template = $('#addPhotoPanel').html();
       $('#photoPanelLoc').append(template);
-      startVideo();
+      $(startVideo);
     });
-
 </script>
+
 <script>
     let imageCapture;
 
@@ -241,26 +345,22 @@
                   $('#amount').val(response.amount);
                   $('video').after(`<div>got response: <pre>${JSON.stringify(response)}</pre></div>`);
                 })
-                // .then(response => {
-                //     alert(response)
-
-                // })
                 .always(() => console.log('request complete'));
 
                 // For debugging, you can uncomment this to see the frame that was captured
-                $('BODY').append(canvas);
+                //$('BODY').append(canvas);
             });
 
     }
 
     function video_onplay() {
       $('#take-pic').attr('disabled', false);
-    }
+    };
 
-    function removePhotoPanel() {
-      $('.PhotoPanel').remove();
+    function removePhotoPanel(){
+      $('.photoPanel').remove();
       $("#take-pic").attr("disabled", false);
-    }
+    };
 
 </script>
 <script id = "addPhotoPanel" type = "template/photoPanel-template">
@@ -268,11 +368,10 @@
     <button class="photoPanel" id="take-pic" onclick="takeSnapshot()">
       Take a Snapshot!
     </button>
-    <button class="photoPanel" id="take-pic-cancel" onclick="removePhotoPanel">cancel!</button>
+    <button class="photoPanel" id="take-pic-cancel" onclick="removePhotoPanel()">cancel!</button>
     <div class="photoPanel" id="vidwrap">
         <video id='videoPlay' autoplay onplay="video_onplay"></video>
     </div>
-    <script> getElementsbyId.play();</script>
   </div>
   </script>
 </html>

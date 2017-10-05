@@ -45,13 +45,12 @@ public class ReceiptImageController {
         Image img = Image.newBuilder().setContent(ByteString.copyFrom(Base64.getDecoder().decode(base64EncodedImage))).build();
         AnnotateImageRequest request = this.requestBuilder.setImage(img).build();
 
+        String merchantName = null;
+        BigDecimal amount = null;
+
         try (ImageAnnotatorClient client = ImageAnnotatorClient.create()) {
             BatchAnnotateImagesResponse responses = client.batchAnnotateImages(Collections.singletonList(request));
             AnnotateImageResponse res = responses.getResponses(0);
-
-            String merchantName = null;
-            BigDecimal amount = null;
-            List<String> merchantNameList = new ArrayList<String>();
 
             // Your Algo Here!!
             // Sort text annotations by bounding polygon.  Top-most non-decimal text is the merchant
@@ -77,6 +76,8 @@ public class ReceiptImageController {
 
             //TextAnnotation fullTextAnnotation = res.getFullTextAnnotation();
             return new ReceiptSuggestionResponse(merchantName, amount);
+        } catch (Exception e) {
+          return new ReceiptSuggestionResponse(merchantName, amount);
         }
     }
 }
