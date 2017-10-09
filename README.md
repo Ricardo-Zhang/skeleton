@@ -1,11 +1,14 @@
 [![CircleCI](https://circleci.com/gh/amfleming/skeleton.svg?style=svg)](https://circleci.com/gh/amfleming/skeleton)
 
 
-skeleton
+Receipt Scanner
 ============
 A super simple foundation for building a scalable RESTful HTTP servers
 
-To build and run with docker:
-1. Run `./gradlew distTar` _this tells gradle to make a .tar file containing the java application code and all dependencies_
-2. Run `docker build -t myapp .` _this runs the Dockerfile, and builds an image tagged with `myapp`.  See all images with `docker images`_
-3. Run `docker run -p 80:8080 myapp` _this runs the `myapp` image, routing port 80 on **Your Machine** to port 8080 in **the container**_
+The system is running at [zzhang96.com](www.zzhang96.com).
+
+As SSL has not been set up  insecurty mode is needed to use the scanning function.   
+
+Please use the below command to open chrome in insecurity mode:   
+
+`/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --unsafely-treat-insecure-origin-as-secure="http://your-site-url-here" --user-data-dir=/tmp`
